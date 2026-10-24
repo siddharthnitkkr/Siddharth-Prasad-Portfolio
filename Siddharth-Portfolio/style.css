@@ -1,0 +1,337 @@
+/* ============================================================
+   Cursor-Tracking Hero — style.css  (v3, matched to the reel)
+
+   Reel layout: full-screen red-orange gradient hero, character
+   large and full-bleed on the right (no card), floating nav
+   pill top-centre, intro text on the left with a big cursive
+   name, bio, and RESUME / LET'S TALK pill buttons.
+   ============================================================ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --ink: #ffffff;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Poppins", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  /* Deep base under the sections; the hero carries its own gradient */
+  background: #570402;
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* Custom cursor replaces the native one on precise pointers */
+@media (pointer: fine) {
+  body, a { cursor: none; }
+}
+
+/* ---------- Floating nav pill ---------- */
+.nav-pill {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 30px;
+  padding: 11px 30px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 30;
+}
+.nav-pill a {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}
+
+/* ---------- Layout ---------- */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  /* orange-red gradient like the reel: orange at left, deep red at right.
+     Matched to the video frames' own reds (bright centre, deep
+     edges) so the character's rectangle blends into the page */
+  background: radial-gradient(120% 95% at 68% 38%, #ad0f0c 0%, #9c0b08 48%, #870806 100%);
+}
+
+/* ---------- Character stage (full-bleed, right side) ---------- */
+/* Aspect ratio MUST match the extracted frames (1000 x 562).
+   Sized by height and bled off the right/top/bottom edges. */
+.stage {
+  position: absolute;
+  top: -2vh;
+  right: -20vw;
+  height: 102vh;
+  aspect-ratio: 1000 / 562;
+  z-index: 1;
+  /* Feather the photo's edges into the page gradient */
+  -webkit-mask-image: radial-gradient(ellipse 96% 90% at 52% 46%, #000 30%, transparent 58%);
+          mask-image: radial-gradient(ellipse 96% 90% at 52% 46%, #000 30%, transparent 58%);
+}
+.portrait {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+#heroCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ---------- Intro text (left side, like the reel) ---------- */
+.intro {
+  position: absolute;
+  left: 5.5vw;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 440px;
+  z-index: 10;
+}
+.intro .hi {
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: 0.34em;
+}
+.intro .name {
+  font-family: "Dancing Script", "Segoe Script", "Brush Script MT", cursive;
+  font-size: clamp(56px, 7vw, 96px);
+  font-weight: 700;
+  line-height: 1.05;
+  margin: 2px 0 14px;
+  text-shadow: 0 4px 26px rgba(150, 10, 0, 0.35);
+}
+.intro .bio {
+  font-size: 15.5px;
+  line-height: 1.65;
+  max-width: 360px;
+  opacity: 0.96;
+}
+.intro .role {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  margin: -4px 0 10px;
+}
+.actions { display: flex; gap: 14px; margin-top: 26px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 26px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.btn-solid {
+  background: #ffffff;
+  color: #e8320f;
+  box-shadow: 0 12px 30px rgba(140, 10, 0, 0.35);
+}
+.btn-ghost {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.btn:hover { transform: translateY(-2px); }
+.btn .arrow { font-size: 15px; }
+
+/* ---------- Custom magnetic cursor ---------- */
+.cursor-dot {
+  position: fixed;
+  left: 0; top: 0;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0;
+}
+.cursor-ring {
+  position: fixed;
+  left: 0; top: 0;
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 49;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+@media (pointer: coarse) {
+  .cursor-dot, .cursor-ring { display: none; }
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 760px) {
+  .stage { right: -38vw; opacity: 0.92; }
+  .intro { left: 22px; right: 22px; max-width: none; }
+  .nav-pill { gap: 18px; padding: 10px 20px; }
+}
+
+
+/* ============================================================
+   Portfolio sections (below the hero)
+   ============================================================ */
+
+/* ---------- Chips ---------- */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips span {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  white-space: nowrap;
+}
+.hero-chips { margin-top: 18px; max-width: 380px; }
+
+/* ---------- Sections ---------- */
+.section {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 92px 5.5vw 8px;
+}
+.kicker {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  color: #ffb59d;
+  margin-bottom: 10px;
+}
+.section-title {
+  font-size: clamp(28px, 3.6vw, 42px);
+  font-weight: 600;
+  line-height: 1.15;
+  margin-bottom: 22px;
+}
+.lead {
+  font-size: 16.5px;
+  line-height: 1.75;
+  opacity: 0.94;
+  max-width: 760px;
+}
+
+/* ---------- About facts ---------- */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-top: 34px;
+}
+.fact {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  padding: 20px 22px;
+}
+.fact-num { display: block; font-size: 26px; font-weight: 600; }
+.fact-label { display: block; font-size: 13px; opacity: 0.82; margin-top: 4px; }
+.certs { margin-top: 30px; }
+.certs-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin-bottom: 12px;
+}
+
+/* ---------- Experience ---------- */
+.job {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 26px 30px;
+  margin-bottom: 18px;
+}
+.job-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.job-head h3 { font-size: 19px; font-weight: 600; }
+.job-dates {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #ffb59d;
+  white-space: nowrap;
+}
+.job-org { font-size: 14.5px; font-weight: 500; opacity: 0.92; margin: 6px 0 12px; }
+.job-note { opacity: 0.75; font-weight: 400; }
+.job ul { list-style: none; }
+.job li {
+  font-size: 14.5px;
+  line-height: 1.65;
+  opacity: 0.92;
+  padding-left: 18px;
+  position: relative;
+  margin-bottom: 5px;
+}
+.job li::before {
+  content: "•";
+  position: absolute;
+  left: 2px;
+  color: #ffb59d;
+}
+
+/* ---------- Skills & recognition cards ---------- */
+.skill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px;
+}
+.skill-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 24px 26px;
+}
+.skill-card h3 { font-size: 16.5px; font-weight: 600; margin-bottom: 14px; }
+.plain-list { list-style: none; }
+.plain-list li { font-size: 14.5px; line-height: 1.65; opacity: 0.94; margin-bottom: 10px; }
+.text-link { color: #ffb59d; text-decoration: none; font-weight: 500; }
+.text-link:hover { text-decoration: underline; }
+
+/* ---------- Contact & footer ---------- */
+.contact .actions { margin-top: 28px; }
+.footer {
+  text-align: center;
+  padding: 70px 20px 34px;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+@media (max-width: 760px) {
+  .section { padding-top: 64px; }
+  .job { padding: 22px 20px; }
+  .hero-chips { max-width: none; }
+}
